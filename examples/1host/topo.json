@@ -1,0 +1,35 @@
+{
+    "channels":[
+        {
+            "name": "vbr-pext",
+            "opts": {
+            }
+        }
+    ],
+    
+    "nodes":[
+        {
+            "name": "qhost", 
+            "net_devices":[
+                {
+                    "name": "veth0",
+                    "channel": "vbr-pext",
+                    "opts": {
+                    }
+                }
+            ],
+            "applications": [
+                {
+                    "app_name": "ip_helper",
+                    "opts": {
+                        "net_device_name": "veth0",
+                        "ip_addr": "10.0.131.254/24"
+                    }
+                }
+            ],
+            "opts": {
+            }
+        }
+    ]
+}
+
