@@ -1,6 +1,5 @@
 magnet
 ======
-
 (no description yet)
 
 Supported platform
@@ -13,12 +12,23 @@ Supported platform
 
 Prerequisites
 -------------
-
 The following software is required.
 
 - python v2.7
 - bridge-utils
 - iproute2
 
+Trial
+-----
+To create a network topology, executes the following command.
 
+    $ sudo python magnet/topology.py ./examples/1host-1gw/topo.json create
+
+To verify the result, executes the following command.
+
+    $ sudo ip netns exec qhost1 ping -c2 qgw
+
+To delete the network topology, executes the following command.
+
+    $ sudo python magnet/topology.py ./examples/1host-1gw/topo.json delete
 
