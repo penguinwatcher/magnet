@@ -9,7 +9,11 @@ if __name__ == '__main__':
     sys.path.append('./test')
     setup(
         name = 'magnet',
+        version = '0.1.0',
         packages = find_packages(),
+        install_requires = [
+            'tornado',
+        ],
         entry_points = """
         [console_scripts]
         magnet-llcli=magnet.llcli:invoke_llcli
