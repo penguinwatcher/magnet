@@ -3,7 +3,6 @@
 
 import sys
 import pkg_resources
-from util import exec_cmd
 from topology import Topology 
 
 def load_exts():

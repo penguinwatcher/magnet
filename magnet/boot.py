@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from util import exec_cmd
 from topology import Topology 
 from extloader import load_exts, set_ext_dict_to_topology
 from api import Servant, Scheduler, Proxy
