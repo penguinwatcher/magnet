@@ -3,69 +3,86 @@
 
 import logging
 
+from cmdexecutor import exec_nothing
+
+
 class ApplicationImplementationBase:
+    def set_cmdexecutor(self, cmdexecutor):
+        self._execc = cmdexecutor
+
+    def application_installed(self, node, opts, context):
+        pass
+
     def start(self, node, opts):
         pass
 
     def stop(self, node, opts):
         pass
 
-    def application_installed(self, node, opts, context):
-        pass
 
 class NullApplicationImplementation (ApplicationImplementationBase):
+    def application_installed(self, node, opts, context):
+        logging.info('null application - application_installed')
+
     def start(self, node, opts):
         logging.info('null application - start')
 
     def stop(self, node, opts):
         logging.info('null application - stop')
 
+
 class Application:
     def __init__(self, name, impl, opts, context):
-        self.name = name
-        self.opts = opts
-        self.impl = impl
-        self.context = context
-        self.node = None
-    
+        self._name = name
+        self._opts = opts
+        self._impl = impl
+        self._context = context
+        self._node = None
+
+    def get_name(self):
+        return self._name
+
     def create(self):
-        if self.impl != None:
-            self.impl.start(self.node, self.opts)
-    
+        if self._impl is not None:
+            self._impl.start(self._node, self._opts)
+
     def delete(self):
-        if self.impl != None:
-            self.impl.stop(self.node, self.opts)
+        if self._impl is not None:
+            self._impl.stop(self._node, self._opts)
 
     def set_node(self, node):
-        self.node = node
-        if self.impl != None:
-            self.impl.application_installed(node, self.opts, self.context)
+        self._node = node
+        if self._impl is not None:
+            self._impl.application_installed(node, self._opts, self._context)
+
 
 class ApplicationFactory:
-    def __init__(self):
-        self.impl_factory_dict = {}
-        self.context_dict = {}
+    def __init__(self, cmdexecutor=exec_nothing):
+        self._impl_factory_dict = {}
+        self._app_context_dict = {}
+        self._execc = cmdexecutor
+
+    def set_cmdexecutor(self, cmdexecutor):
+        self._execc = cmdexecutor
 
     def create_application(self, app_name, opts={}):
-        if self.impl_factory_dict.has_key(app_name):
-            impl_factory = self.impl_factory_dict[app_name]
-            context = self.context_dict[app_name]
+        app_context = None
+        if app_name in self._impl_factory_dict:
+            impl_factory = self._impl_factory_dict[app_name]
+            app_context = self._app_context_dict[app_name]
         else:
-            impl_factory = lambda : NullApplicationImplementation()
-            context = {}
+            impl_factory = NullApplicationImplementation
+            app_context = {}
         impl = impl_factory()
-        return Application(app_name, impl, opts, context)
+        impl.set_cmdexecutor(self._execc)
+        return Application(app_name, impl, opts, app_context)
 
     def register_app_impl_factory(self, app_name, impl_factory):
-        self.impl_factory_dict[app_name] = impl_factory
-        self.context_dict[app_name] = {}
+        self._impl_factory_dict[app_name] = impl_factory
+        self._app_context_dict[app_name] = {}
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    factory = ApplicationFactory()
-    app = factory.create_application('hoge')
-    app.create()
-    app.delete()
+    pass
 
-
+# EOF
