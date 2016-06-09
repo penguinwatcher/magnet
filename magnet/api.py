@@ -5,36 +5,44 @@ import Queue
 import threading
 import json
 
-from topology import Topology
 
 class Api:
-    def operate_topology(self, cmd_obj): abstract
+    def operate_topology(self, req_obj):
+        pass
+
 
 class Service:
-    def start(self): abstract
-    def stop(self): abstract
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
 
 class Servant(Api):
     def __init__(self, topology=None):
         self._topology = topology
 
-    def operate_topology(self, jsonrpc_req_obj):
-        print json.dumps(jsonrpc_req_obj)
+    def operate_topology(self, req_obj):
+        print json.dumps(req_obj)
         # operates topology here.
-        jsonrpc_res_obj = {
+        res_obj = {
                 "jsonrpc": "2.0",
-                "result": null,
+                "result": None,
                 "error": {
                         "code": -32603,
                         "message": "not implemented yet",
-                        "data": null
+                        "data": None
                     },
-                "id": cmd_obj["id"]
+                "id": req_obj["id"]
             }
-        return RealResponse(jsonrpc_res_obj)
+        return RealResponse(res_obj)
+
 
 class Response:
-    def get_value(self): abstract
+    def get_value(self):
+        pass
+
 
 class FutureResponse(Response):
     def __init__(self):
@@ -54,6 +62,7 @@ class FutureResponse(Response):
                 self._cond.wait()
             return self._response.get_value()
 
+
 class RealResponse(Response):
     def __init__(self, value):
         self._value = value
@@ -61,20 +70,23 @@ class RealResponse(Response):
     def get_value(self):
         return self._value
 
+
 class Request:
     def __init__(self, servant, future):
         self._servant = servant
         self._future = future
 
-    def execute(self): abstract
+    def execute(self):
+        pass
+
 
 class OperateTopologyRequest(Request):
-    def __init__(self, servant, future, cmd_obj):
+    def __init__(self, servant, future, req_obj):
         Request.__init__(self, servant, future)
-        self._cmd_obj = cmd_obj
+        self._req_obj = req_obj
 
     def execute(self):
-        res = self._servant.operate_topology(self._cmd_obj)
+        res = self._servant.operate_topology(self._req_obj)
         self._future.set_response(res)
 
 
@@ -83,7 +95,7 @@ class Scheduler(threading.Thread):
         threading.Thread.__init__(self, name="scheduler-thread")
         self._queue = Queue.Queue()
         self._is_stopped = False
-    
+
     def invoke(self, request):
         self._queue.put(request)
 
@@ -94,6 +106,7 @@ class Scheduler(threading.Thread):
 
     def stop(self):
         self._is_stopped = True
+
 
 class Proxy(Api, Service):
     def __init__(self, scheduler, servant):
@@ -106,17 +119,19 @@ class Proxy(Api, Service):
     def stop(self):
         self._scheduler.stop()
 
-    def operate_topology(self, cmd_obj):
+    def operate_topology(self, req_obj):
         future = FutureResponse()
-        req = OperateTopologyRequest(self._servant, future, cmd_obj)
+        req = OperateTopologyRequest(self._servant, future, req_obj)
         self._scheduler.invoke(req)
         return future
+
 
 def create_api_service():
     servant = Servant()
     scheduler = Scheduler()
     proxy = Proxy(scheduler, servant)
     return proxy
+
 
 if __name__ == '__main__':
     import time
@@ -144,6 +159,5 @@ if __name__ == '__main__':
     api_service.start()
     client_a.start()
     client_b.start()
-    
 
-
+# EOF

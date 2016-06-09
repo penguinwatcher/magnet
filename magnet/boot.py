@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from topology import Topology 
+from topology import Topology
 from extloader import load_exts, set_ext_dict_to_topology
 from api import Servant, Scheduler, Proxy
 from llcli import LowLevelCli, set_llcli_invoke_func
+
 
 def boot(argvs):
     # loads extensions
@@ -20,9 +21,11 @@ def boot(argvs):
     llcli = LowLevelCli()
     llcli.set_api(api_service)
     llcli_parser = llcli.create_argparser()
+
     def llcli_invoke_func(argv=sys.argv[1:]):
         args = llcli_parser.parse_args(argv)
         args.func(args)
+
     set_llcli_invoke_func(llcli_invoke_func)
 
     # creates topology
@@ -39,4 +42,4 @@ if __name__ == '__main__':
     argvs = sys.argv
     boot(argvs)
 
-
+# EOF

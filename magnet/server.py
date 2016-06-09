@@ -15,8 +15,8 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
         self._api = api
 
     def get(self):
-        if self._api != None:
-            req_obj = self._create_jsonrpc('get-topology')
+        if self._api is not None:
+            req_obj = self._create_req_obj('get-topology')
             res = self._api.operate_topology(req_obj)
             self._write_response(res)
         else:
@@ -25,9 +25,11 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
             self.write(msg)
 
     def put(self):
-        if self._api != None:
+        if self._api is not None:
             topo = json.loads(self.request.body)
-            req_obj = self._create_jsonrpc('create-topology', {'topology': topo})
+            req_obj = self._create_req_obj(
+                    'create-topology',
+                    {'topology': topo})
             res = self._api.operate_topology(req_obj)
             self._write_response(res)
         else:
@@ -36,8 +38,8 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
             self.write(msg)
 
     def delete(self):
-        if self._api != None:
-            req_obj = self._create_jsonrpc('delete-topology')
+        if self._api is not None:
+            req_obj = self._create_req_obj('delete-topology')
             res = self._api.operate_topology(req_obj)
             self._write_response(res)
         else:
@@ -45,7 +47,7 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
             self.set_status(httplib.NOT_IMPLEMENTED, msg)
             self.write(msg)
 
-    def _create_jsonrpc(self, method, params={}):
+    def _create_req_obj(self, method, params={}):
         return {
             "jsonrpc": "2.0",
             "method": method,
@@ -56,11 +58,12 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
     def _write_response(self, response):
         value = response.get_value()
         res_obj = None
-        if value.error != None:
+        if value.error is not None:
             res_obj = value.result
         else:
             res_obj = value
         self.write(res_obj)
+
 
 def start_server(port=8888, address="", api=None):
     handlers = [
@@ -78,4 +81,4 @@ def start_server(port=8888, address="", api=None):
 if __name__ == '__main__':
     start_server()
 
-
+# EOF
