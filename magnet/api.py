@@ -1,42 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
 import Queue
 import threading
 import json
 
 
-class Api:
-    def operate_topology(self, req_obj):
+class Request:
+    def __init__(self, servant, future):
+        self._servant = servant
+        self._future = future
+
+    def execute(self):
         pass
 
 
-class Service:
-    def start(self):
-        pass
+class OperateTopologyRequest(Request):
+    def __init__(self, servant, future, req_obj):
+        Request.__init__(self, servant, future)
+        self._req_obj = req_obj
 
-    def stop(self):
-        pass
-
-
-class Servant(Api):
-    def __init__(self, topology=None):
-        self._topology = topology
-
-    def operate_topology(self, req_obj):
-        print json.dumps(req_obj)
-        # operates topology here.
-        res_obj = {
-                "jsonrpc": "2.0",
-                "result": None,
-                "error": {
-                        "code": -32603,
-                        "message": "not implemented yet",
-                        "data": None
-                    },
-                "id": req_obj["id"]
-            }
-        return RealResponse(res_obj)
+    def execute(self):
+        res = self._servant.operate_topology(self._req_obj)
+        self._future.set_response(res)
 
 
 class Response:
@@ -71,23 +58,37 @@ class RealResponse(Response):
         return self._value
 
 
-class Request:
-    def __init__(self, servant, future):
-        self._servant = servant
-        self._future = future
-
-    def execute(self):
+class Api:
+    def operate_topology(self, req_obj):
         pass
 
 
-class OperateTopologyRequest(Request):
-    def __init__(self, servant, future, req_obj):
-        Request.__init__(self, servant, future)
-        self._req_obj = req_obj
+class Service:
+    def start(self):
+        pass
 
-    def execute(self):
-        res = self._servant.operate_topology(self._req_obj)
-        self._future.set_response(res)
+    def stop(self):
+        pass
+
+
+class Servant(Api):
+    def __init__(self, topology=None):
+        self._topology = topology
+
+    def operate_topology(self, req_obj):
+        logging.info(json.dumps(req_obj))
+        # operates topology here.
+        res_obj = {
+                "jsonrpc": "2.0",
+                "result": None,
+                "error": {
+                        "code": -32603,
+                        "message": "not implemented yet",
+                        "data": None
+                    },
+                "id": req_obj["id"]
+            }
+        return RealResponse(res_obj)
 
 
 class Scheduler(threading.Thread):
@@ -100,9 +101,13 @@ class Scheduler(threading.Thread):
         self._queue.put(request)
 
     def run(self):
-        while not self._is_stopped:
-            request = self._queue.get()
-            request.execute()
+        try:
+            logging.debug('starting scheduler-task.')
+            while not self._is_stopped:
+                request = self._queue.get()
+                request.execute()
+        finally:
+            logging.debug('scheduler-task stopped.')
 
     def stop(self):
         self._is_stopped = True

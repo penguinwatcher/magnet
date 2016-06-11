@@ -5,6 +5,7 @@ import httplib
 import json
 import os
 import uuid
+import logging
 
 import tornado.ioloop
 import tornado.web
@@ -52,20 +53,22 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
             "jsonrpc": "2.0",
             "method": method,
             "params": params,
-            "id": uuid.uuid4(),
+            "id": str(uuid.uuid4()),
             }
 
     def _write_response(self, response):
         value = response.get_value()
+        import json
+        print json.dumps(value)
         res_obj = None
-        if value.error is not None:
-            res_obj = value.result
+        if 'error' not in value or value['error'] is None:
+            res_obj = value['result']
         else:
             res_obj = value
-        self.write(res_obj)
+        self.write(json.dumps(res_obj))
 
 
-def start_server(port=8888, address="", api=None):
+def create_server_instance(port=8888, address="", api=None):
     handlers = [
         (r"/api/v1/topology", TopologyRequestHandler, dict(api=api)),
         ]
@@ -73,12 +76,19 @@ def start_server(port=8888, address="", api=None):
         "template_path": os.path.join(os.path.dirname(__file__), "templates"),
         "static_path": os.path.join(os.path.dirname(__file__), "static"),
         }
+    logging.info('Starting server %s:%d' % (address, port))
     application = tornado.web.Application(handlers, **settings)
     application.listen(port, address)
-    tornado.ioloop.IOLoop.instance().start()
+    return tornado.ioloop.IOLoop.instance()
+
+
+def start_server(port=8888, address="", api=None):
+    server_instance = create_server_instance(port, address, api)
+    server_instance.start()
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     start_server()
 
 # EOF
