@@ -16,6 +16,7 @@ if __name__ == '__main__':
         ],
         entry_points = """
         [console_scripts]
+        magnet=magnet.boot:boot
         magnet-llcli=magnet.llcli:invoke_llcli
         """
     )
