@@ -6,6 +6,8 @@ import Queue
 import threading
 import json
 
+from operations import operate_none, create_res_obj, EOBJ_INTERNAL_ERROR
+
 
 class Request:
     def __init__(self, servant, future):
@@ -74,21 +76,32 @@ class Service:
 class Servant(Api):
     def __init__(self, topology=None):
         self._topology = topology
+        self._operation_dict = {}
+
+    def set_operation_dict(self, operation_dict):
+        self._operation_dict = operation_dict
 
     def operate_topology(self, req_obj):
         logging.info(json.dumps(req_obj))
         # operates topology here.
-        res_obj = {
-                "jsonrpc": "2.0",
-                "result": None,
-                "error": {
-                        "code": -32603,
-                        "message": "not implemented yet",
-                        "data": None
-                    },
-                "id": req_obj["id"]
-            }
+        operation = self.get_operation(req_obj['method'])
+        if self._topology is not None:
+            res_obj = operation(self._topology, req_obj)
+        else:
+            res_obj = create_res_obj(
+                    None,
+                    req_obj['id'],
+                    EOBJ_INTERNAL_ERROR.code,
+                    'topology is not setup.')
         return RealResponse(res_obj)
+
+    def get_operation(self, method_name):
+        operation = None
+        if method_name in self._operation_dict:
+            operation = self._operation_dict[method_name]
+        if operation is None:
+            operation = operate_none
+        return operation
 
 
 class Scheduler(threading.Thread):

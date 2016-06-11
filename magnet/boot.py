@@ -6,7 +6,9 @@ import sys
 import threading
 
 from api import Servant, Scheduler, Proxy
+from cmdexecutor import exec_linux_cmd
 from extloader import load_exts, set_ext_dict_to_topology
+from operations import get_operation_dict
 from server import create_server_instance
 from topology import Topology
 
@@ -23,20 +25,25 @@ from topology import Topology
 #    set_llcli_invoke_func(llcli_invoke_func)
 
 
-def create_api_service(args=[]):
+def create_api_service(opts={}):
     # loads extensions
     ext_dict = load_exts()
-
-    # creates api service
-    servant = Servant()
-    scheduler = Scheduler()
-    proxy = Proxy(scheduler, servant)
 
     # creates topology
     topology = Topology()
 
-    # sets extensions to topology
+    # creates api service
+    servant = Servant(topology)
+    scheduler = Scheduler()
+    proxy = Proxy(scheduler, servant)
+
+    # configures api service
+    servant.set_operation_dict(get_operation_dict())
+    
+    # configures topology
     set_ext_dict_to_topology(ext_dict, topology)
+    if 'is_exec_nothing' not in opts or not opts['is_exec_nothing']:
+        topology.set_cmdexecutor(exec_linux_cmd)
 
     return proxy
 

@@ -13,7 +13,7 @@
             "net_devices":[
                 {
                     "name": "veth0",
-                    "channel": "vbr-pext",
+                    "channel_name": "vbr-pext",
                     "opts": {
                     }
                 }

@@ -50,6 +50,43 @@ def deobjectize_node(obj, channel_dict, app_factory):
     return node
 
 
+def objectize_component(component):
+    obj = OrderedDict()
+    obj['name'] = component._name
+    obj['opts'] = component._opts
+    return obj
+
+
+def objectize_channel(channel):
+    obj = objectize_component(channel)
+    return obj
+
+
+def objectize_net_device(net_device):
+    obj = objectize_component(net_device)
+    if net_device._channel is not None:
+        obj['channel_name'] = net_device._channel._name
+    return obj
+
+
+def objectize_application(application):
+    obj = OrderedDict()
+    obj['app_name'] = application._name
+    obj['opts'] = application._opts
+    return obj
+
+
+def objectize_node(node):
+    obj = objectize_component(node)
+    obj['net_devices'] = [
+        objectize_net_device(net_device)
+        for net_device in node._net_devices.values()]
+    obj['applications'] = [
+        objectize_application(application)
+        for application in node._applications]
+    return obj
+
+
 class Topology:
     def __init__(self):
         self._execc = exec_nothing
@@ -62,6 +99,21 @@ class Topology:
     def set_cmdexecutor(self, cmdexecutor):
         self._execc = cmdexecutor
         self._app_factory.set_cmdexecutor(cmdexecutor)
+
+    def is_created(self):
+        return self._is_created
+
+    def to_obj(self):
+        channels = [
+                objectize_channel(channel)
+                for channel in self._channel_dict.values()]
+        nodes = [
+                objectize_node(node)
+                for node in self._node_dict.values()]
+        obj = OrderedDict()
+        obj['channels'] = channels
+        obj['nodes'] = nodes
+        return obj
 
     def append_channel(self, obj):
         channel = deobjectize(obj, Channel)
@@ -81,6 +133,8 @@ class Topology:
         return node
 
     def setup_topology_obj(self, obj):
+        self._channel_dict.clear()
+        self._node_dict.clear()
         if 'channels' in obj:
             for channel_obj in obj['channels']:
                 self.append_channel(channel_obj)
@@ -101,6 +155,7 @@ class Topology:
         for name, channel in self._channel_dict.iteritems():
             channel.delete()
         self._is_created = False
+
 
 if __name__ == '__main__':
     import sys

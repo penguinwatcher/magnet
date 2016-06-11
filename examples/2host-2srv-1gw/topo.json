@@ -18,12 +18,12 @@
             "net_devices": [
                 {
                     "name": "veth0",
-                    "channel": "vbr-pext",
+                    "channel_name": "vbr-pext",
                     "opts": {}
                 },
                 {
                     "name": "veth1",
-                    "channel": "vbr-pint",
+                    "channel_name": "vbr-pint",
                     "opts": {}
                 }
             ],
@@ -57,7 +57,7 @@
             "net_devices": [
                 {
                     "name": "veth0",
-                    "channel": "vbr-pint",
+                    "channel_name": "vbr-pint",
                     "opts": {}
                 }
             ],
@@ -79,7 +79,7 @@
             "net_devices": [
                 {
                     "name": "veth0",
-                    "channel": "vbr-pint",
+                    "channel_name": "vbr-pint",
                     "opts": {}
                 }
             ],
@@ -102,7 +102,7 @@
                 {
                     "node_name": "qhost1",
                     "name": "veth0",
-                    "channel": "vbr-pext",
+                    "channel_name": "vbr-pext",
                     "opts": {
                     }
                 }
@@ -126,7 +126,7 @@
                 {
                     "node_name": "qhost2",
                     "name": "veth0",
-                    "channel": "vbr-pext",
+                    "channel_name": "vbr-pext",
                     "opts": {}
                 }
             ],
