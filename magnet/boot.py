@@ -39,7 +39,7 @@ def create_api_service(opts={}):
 
     # configures api service
     servant.set_operation_dict(get_operation_dict())
-    
+
     # configures topology
     set_ext_dict_to_topology(ext_dict, topology)
     if 'is_exec_nothing' not in opts or not opts['is_exec_nothing']:
@@ -48,7 +48,9 @@ def create_api_service(opts={}):
     return proxy
 
 
-def boot(argvs):
+def boot(argvs=[]):
+    logging.basicConfig(level=logging.DEBUG)
+
     api_service = create_api_service()
 
     server_instance = create_server_instance(port=8888, api=api_service)
@@ -85,7 +87,6 @@ def boot(argvs):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
     argvs = sys.argv
     boot(argvs)
 

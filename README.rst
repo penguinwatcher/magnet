@@ -18,6 +18,10 @@ The following software is required.
 - bridge-utils
 - iproute2
 
+The following python modules are required.
+
+- tornado 4.3
+
 Trial
 -----
 To create a network topology, executes the following command.
