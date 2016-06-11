@@ -27,7 +27,7 @@ Preparation
 
 Install required software.::
 
-    $ sudo apt-get install bridge-utils iproute2
+    $ sudo apt-get install bridge-utils
 
 Installation
 ------------

@@ -6,9 +6,31 @@ Supported platform and prerequisites
 
 See :doc:`Installation`
 
+Preparation
+-----------
+
+Install git.::
+
+    $ sudo apt-get install git-core -y
+
+Install pip.::
+
+    $ curl -O curl -O https://bootstrap.pypa.io/get-pip.py
+    ...
+    $ sudo python get-pip.py
+
+To remove pip warning, create cache directory.::
+
+    $ mkdir -p ~/.cache/pip/http
+
 To develop magnet, it is useful to use virtualenv.::
 
     $ sudo pip install virtualenv
+
+Flake8 should be installed.::
+
+    $ sudo pip install flake8
+
 
 Installation
 ------------
