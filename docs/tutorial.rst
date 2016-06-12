@@ -4,7 +4,8 @@ Tutorial
 Creates example topology
 ------------------------
 
-::
+To create an example topology, execute the following command.::
+
     $ magnet-cli create-topology --file examples/2host-2srv-1gw/topo.json 
     {"channels": [{"name": "vbr-pext", "opts": {}}, {"name": "vbr-pint",  ...
     
@@ -12,7 +13,8 @@ Creates example topology
 Shows current topology
 ----------------------
 
-::
+To show the current topology, execute the following command.::
+
     $ magnet-cli get-topology
     {"channels": [{"name": "vbr-pext", "opts": {}}, {"name": "vbr-pint",  ...
     
@@ -20,7 +22,8 @@ Shows current topology
 Confirms the virtual network
 ----------------------------
 
-::
+To confirm the current network topology, 'ip netns' command could be used.::
+
     $ ip netns 
     qhost2
     qhost1
@@ -40,7 +43,8 @@ Confirms the virtual network
 Deletes current topology
 ------------------------
 
-::
+To delete the current topology, execute the following commands.::
+
     $ magnet-cli delete-topology
     {"channels": [], "nodes": []}
 
