@@ -115,10 +115,14 @@ class Scheduler(threading.Thread):
 
     def run(self):
         try:
+            timeout_sec = 1.0
             logging.debug('starting scheduler-task.')
             while not self._is_stopped:
-                request = self._queue.get()
-                request.execute()
+                try:
+                    request = self._queue.get(timeout_sec)
+                    request.execute()
+                except (Empty):
+                    pass
         finally:
             logging.debug('scheduler-task stopped.')
 

@@ -54,7 +54,7 @@ How to start and stop magnet
 
 To start magnet service, execute the following command.::
 
-    (magnet-env) $ sudo magnet
+    (magnet-env) $ sudo ../magnet-env/bin/magnet
 
 NOTICE: 'sudo' is required because magnet internally uses brctl, ip netns and so on.
 
