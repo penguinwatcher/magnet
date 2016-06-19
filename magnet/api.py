@@ -7,6 +7,7 @@ import threading
 import json
 
 from operations import operate_none, create_res_obj, EOBJ_INTERNAL_ERROR
+from reqres import create_delete_topology_req_obj
 
 
 class Request:
@@ -115,16 +116,18 @@ class Scheduler(threading.Thread):
 
     def run(self):
         try:
-            timeout_sec = 1.0
-            logging.debug('starting scheduler-task.')
+            timeout_sec = 4.0
+            logging.info('starting scheduler-task.')
             while not self._is_stopped:
                 try:
-                    request = self._queue.get(timeout_sec)
+                    request = self._queue.get(
+                            block=True,
+                            timeout=timeout_sec)
                     request.execute()
-                except (Empty):
+                except Queue.Empty:
                     pass
         finally:
-            logging.debug('scheduler-task stopped.')
+            logging.info('scheduler-task stopped.')
 
     def stop(self):
         self._is_stopped = True
@@ -136,16 +139,28 @@ class Proxy(Api, Service):
         self._servant = servant
 
     def start(self):
+        logging.info('proxy started.')
         self._scheduler.start()
 
     def stop(self):
+        logging.info('cleaning topology.')
+        self.clean_topology()
+        logging.info('topology cleaned.')
         self._scheduler.stop()
+        logging.info('waiting scheduler stopped.')
+        self._scheduler.join(30.0)
+        logging.info('proxy stopped.')
 
     def operate_topology(self, req_obj):
         future = FutureResponse()
         req = OperateTopologyRequest(self._servant, future, req_obj)
         self._scheduler.invoke(req)
         return future
+
+    def clean_topology(self):
+        req_obj = create_delete_topology_req_obj()
+        future = self.operate_topology(req_obj)
+        future.get_value()
 
 
 def create_api_service():

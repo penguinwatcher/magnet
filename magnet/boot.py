@@ -13,18 +13,6 @@ from server import create_server_instance
 from topology import Topology
 
 
-# def configure_llcli(api):
-#    llcli = LowLevelCli()
-#    llcli.set_api(api)
-#    llcli_parser = llcli.create_argparser()
-#
-#    def llcli_invoke_func(argv=sys.argv[1:]):
-#        args = llcli_parser.parse_args(argv)
-#        args.func(args)
-#
-#    set_llcli_invoke_func(llcli_invoke_func)
-
-
 def create_api_service(opts={}):
     # loads extensions
     ext_dict = load_exts()
@@ -38,6 +26,7 @@ def create_api_service(opts={}):
     proxy = Proxy(scheduler, servant)
 
     # configures api service
+    scheduler.daemon = True
     servant.set_operation_dict(get_operation_dict())
 
     # configures topology
@@ -55,13 +44,6 @@ def boot(argvs=[]):
 
     server_instance = create_server_instance(port=8888, api=api_service)
 
-    def api_service_task():
-        try:
-            logging.info('Starting api service.')
-            api_service.start()
-        finally:
-            logging.info('api service stopped.')
-
     def server_instance_task():
         try:
             logging.info('Starting server instance.')
@@ -75,15 +57,21 @@ def boot(argvs=[]):
         th.start()
         return th
 
-    th_api_service = start_thread_as_daemon(
-            target=api_service_task,
-            name='api_service_thread')
+    api_service.start()
+    
     th_server_instance = start_thread_as_daemon(
             target=server_instance_task,
             name='server_instance_thread')
 
-    th_api_service.join()
-    th_server_instance.join()
+    server_instance_join_timeout = 10.0
+    while th_server_instance.is_alive():
+        try:
+            th_server_instance.join(server_instance_join_timeout)
+        except KeyboardInterrupt, SystemExit:
+            logging.info('Interrupted')
+            server_instance.stop()
+            api_service.stop()
+    logging.info('main thread terminated.')
 
 
 if __name__ == '__main__':

@@ -4,11 +4,14 @@
 import httplib
 import json
 import os
-import uuid
 import logging
 
 import tornado.ioloop
 import tornado.web
+
+from reqres import create_get_topology_req_obj
+from reqres import create_create_topology_req_obj
+from reqres import create_delete_topology_req_obj
 
 
 class TopologyRequestHandler(tornado.web.RequestHandler):
@@ -17,7 +20,7 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
 
     def get(self):
         if self._api is not None:
-            req_obj = self._create_req_obj('get-topology')
+            req_obj = create_get_topology_req_obj()
             res = self._api.operate_topology(req_obj)
             self._write_response(res)
         else:
@@ -28,9 +31,7 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
     def put(self):
         if self._api is not None:
             topo = json.loads(self.request.body)
-            req_obj = self._create_req_obj(
-                    'create-topology',
-                    {'topology': topo})
+            req_obj = create_create_topology_req_obj(topo)
             res = self._api.operate_topology(req_obj)
             self._write_response(res)
         else:
@@ -40,21 +41,13 @@ class TopologyRequestHandler(tornado.web.RequestHandler):
 
     def delete(self):
         if self._api is not None:
-            req_obj = self._create_req_obj('delete-topology')
+            req_obj = create_delete_topology_req_obj()
             res = self._api.operate_topology(req_obj)
             self._write_response(res)
         else:
             msg = 'delete-topology not implemented yet.'
             self.set_status(httplib.NOT_IMPLEMENTED, msg)
             self.write(msg)
-
-    def _create_req_obj(self, method, params={}):
-        return {
-            "jsonrpc": "2.0",
-            "method": method,
-            "params": params,
-            "id": str(uuid.uuid4()),
-            }
 
     def _write_response(self, response):
         value = response.get_value()
