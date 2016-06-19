@@ -25,6 +25,10 @@ class Channel:
         self._execc('brctl addbr %s' % (self._name,))
         self._execc('brctl stp %s off' % (self._name,))
         self._execc('ip link set dev %s up' % (self._name,))
+        if 'ip_addr' in self._opts:
+            self._execc('ip addr add %s dev %s' % (
+                self._opts['ip_addr'],
+                self._name))
         if 'vxlans' in self._opts:
             for vxlan_opt in self._opts['vxlans']:
                 self._create_vxlan(vxlan_opt)
@@ -34,6 +38,10 @@ class Channel:
         if 'vxlans' in self._opts:
             for vxlan_opt in self._opts['vxlans']:
                 self._delete_vxlan(vxlan_opt)
+        if 'ip_addr' in self._opts:
+            self._execc('ip addr del %s dev %s' % (
+                self._opts['ip_addr'],
+                self._name))
         self._execc('ip link set dev %s down' % (self._name,))
         self._execc('brctl delbr %s' % (self._name,))
 
