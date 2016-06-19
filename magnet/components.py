@@ -47,8 +47,10 @@ class Channel:
         arg_group_or_remote = None
         if 'remote' in vxlan_opt:
             arg_group_or_remote = ('remote %s' % (vxlan_opt['remote'],))
-        else:
+        elif 'group' in vxlan_opt:
             arg_group_or_remote = ('group %s' % (vxlan_opt['group'],))
+        else:
+            arg_group_or_remote = ('group 239.1.1.1')
         cmd_add_vxlan = ('ip link add %s type vxlan id %d %s dev %s' % (
             vxlan_opt['name'],
             vxlan_opt['vxlan_id'],
