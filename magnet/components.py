@@ -25,9 +25,15 @@ class Channel:
         self._execc('brctl addbr %s' % (self._name,))
         self._execc('brctl stp %s off' % (self._name,))
         self._execc('ip link set dev %s up' % (self._name,))
+        if 'vxlans' in self._opts:
+            for vxlan_opt in self._opts['vxlans']:
+                self._create_vxlan(vxlan_opt)
 
     def delete(self):
         """Deletes this channel."""
+        if 'vxlans' in self._opts:
+            for vxlan_opt in self._opts['vxlans']:
+                self._delete_vxlan(vxlan_opt)
         self._execc('ip link set dev %s down' % (self._name,))
         self._execc('brctl delbr %s' % (self._name,))
 
@@ -36,6 +42,26 @@ class Channel:
 
     def remove_net_device(self, net_device):
         self._net_devices.remove(net_device)
+
+    def _create_vxlan(self, vxlan_opt):
+        arg_group_or_remote = None
+        if 'remote' in vxlan_opt:
+            arg_group_or_remote = ('remote %s' % (vxlan_opt['remote'],))
+        else:
+            arg_group_or_remote = ('group %s' % (vxlan_opt['group'],))
+        cmd_add_vxlan = ('ip link add %s type vxlan id %d %s dev %s' % (
+            vxlan_opt['name'],
+            vxlan_opt['vxlan_id'],
+            arg_group_or_remote,
+            vxlan_opt['dev'],
+            ))
+        self._execc(cmd_add_vxlan)
+        self._execc('ip link set up %s' % vxlan_opt['name'])
+        self._execc('brctl addif %s %s' % (self._name, vxlan_opt['name']))
+
+    def _delete_vxlan(self, vxlan_opt):
+        self._execc('brctl delif %s %s' % (self._name, vxlan_opt['name']))
+        self._execc('ip link delete %s' % vxlan_opt['name'])
 
 
 class NetDevice:

@@ -3,11 +3,27 @@
         {
             "name": "vbr-pext",
             "opts": {
+                "vxlans":[
+                    {
+                        "name": "vxlan-pext",
+                        "vxlan_id": 42,
+                        "remote": "pg01",
+                        "dev": "eth0"
+                    }
+                ]
             }
         },
         {
             "name": "vbr-pint",
             "opts": {
+                "vxlans":[
+                    {
+                        "name": "vxlan-pint",
+                        "vxlan_id": 43,
+                        "remote": "pg01",
+                        "dev": "eth0"
+                    }
+                ]
             }
         }
     ],
