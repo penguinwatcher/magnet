@@ -87,6 +87,14 @@ def objectize_node(node):
     return obj
 
 
+class TopologyError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class Topology:
     def __init__(self):
         self._execc = exec_nothing
@@ -132,6 +140,14 @@ class Topology:
         self._node_dict[node.get_name()] = node
         return node
 
+    def check_obj(self, obj):
+        if obj is None:
+            raise TopologyError(
+                    'Invalid argument. obj is None.')
+        elif 'name' not in obj:
+            raise TopologyError(
+                    'Invalid argument. \'name\' not in obj.')
+
     def setup_topology_obj(self, obj):
         self._channel_dict.clear()
         self._node_dict.clear()
@@ -154,7 +170,87 @@ class Topology:
             node.delete()
         for name, channel in self._channel_dict.iteritems():
             channel.delete()
+        self._node_dict.clear()
+        self._channel_dict.clear()
         self._is_created = False
+
+    def get_channels(self):
+        obj = [
+                objectize_channel(channel)
+                for channel in self._channel_dict.values()]
+        return obj
+
+    def get_channel(self, name):
+        obj = None
+        channel = self._channel_dict[name]
+        if channel is not None:
+            obj = objectize_channel(channel)
+        return obj
+
+    def create_channel(self, obj):
+        self.check_obj(obj)
+        name = obj['name']
+        if name in self._channel_dict:
+            raise TopologyError(
+                    'Channel already exists: %s' % name)
+        channel = self.append_channel(obj)
+        if channel is None:
+            raise TopologyError('Internal error.')
+        channel.create()
+        return objectize_channel(channel)
+
+    def update_channel(self, obj):
+        self.check_obj(obj)
+        name = obj['name']
+        self.delete_channel(name)
+        return self.create_channel(obj)
+
+    def delete_channel(self, name):
+        if name not in self._channel_dict:
+            raise TopologyError(
+                    'Channel not found.: %s' % name)
+        channel = self._channel_dict.pop(name)
+        channel.delete()
+        return objectize_channel(channel)
+
+    def get_nodes(self):
+        obj = [
+                objectize_node(node)
+                for node in self._node_dict.values()]
+        return obj
+
+    def get_node(self, name):
+        obj = None
+        node = self._node_dict[name]
+        if node is not None:
+            obj = objectize_node(node)
+        return obj
+
+    def create_node(self, obj):
+        self.check_obj(obj)
+        name = obj['name']
+        if name in self._node_dict:
+            raise TopologyError(
+                    'Node already exists: %s' % name)
+        node = self.append_node(obj)
+        if node is None:
+            raise TopologyError('Internal error.')
+        node.create()
+        return objectize_node(node)
+
+    def update_node(self, obj):
+        self.check_obj(obj)
+        name = obj['name']
+        self.delete_node(name)
+        return self.create_node(obj)
+
+    def delete_node(self, name):
+        if name not in self._node_dict:
+            raise TopologyError(
+                    'Node not found.: %s' % name)
+        node = self._node_dict.pop(name)
+        node.delete()
+        return objectize_node(node)
 
 
 if __name__ == '__main__':
